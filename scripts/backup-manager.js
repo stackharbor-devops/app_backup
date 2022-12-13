@@ -149,20 +149,7 @@ function BackupManager(config) {
                 envName : config.envName
             }],
             [ me.cmd, [
-		'echo $(date) %(envName) Restoring the database from snapshot $(cat /root/.backupid)',
-                '! which mysqld || service mysql start 2>&1',
-                'for i in DB_HOST DB_USER DB_PASSWORD DB_NAME; do declare "${i}"=$(cat %(appPath)/wp-config.php |grep ${i}|awk \'{print $3}\'|tr -d "\'"); done',
-                'source /etc/jelastic/metainf.conf ; if [ "${COMPUTE_TYPE}" == "lemp" -o "${COMPUTE_TYPE}" == "llsmp" ]; then wget -O /root/addAppDbUser.sh %(baseUrl)/scripts/addAppDbUser.sh; chmod +x /root/addAppDbUser.sh; bash /root/addAppDbUser.sh ${DB_USER} ${DB_PASSWORD} ${DB_HOST}; fi',
-                'mysql -u${DB_USER} -p${DB_PASSWORD} -h ${DB_HOST} --execute="CREATE DATABASE IF NOT EXISTS ${DB_NAME};"',
-                'mysql -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} --force < /root/app_db_backup.sql'
-            ], {
-                nodeId : config.backupExecNode,
-                envName : config.envName,
-                baseUrl : config.baseUrl,
-                appPath : "/var/www/webroot/ROOT"
-            }],
-            [ me.cmd, [
-                'rm -f /root/.backupid /root/app_db_backup.sql',
+                'rm -f /root/.backupid',
                 'jem service start'
             ], {
                 nodeGroup : "cp",

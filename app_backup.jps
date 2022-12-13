@@ -1,10 +1,10 @@
 type: update
 jpsVersion: 6.1.1
-name: Application Backup/Restore for the filesystem and the databases
+name: Application Backup/Restore for the filesystem
 id: app-backup
 targetEditions: any
 logo: /images/backup-logo.svg
-description: Backup Add-On for the application root directory and the database. It can be used to create scheduled backups according to any required timezone and restore corrupted websites, even if the content has been completely deleted.
+description: Backup Add-On for the application root directory. It can be used to create scheduled backups according to any required timezone and restore corrupted websites, even if the content has been completely deleted.
 baseUrl: https://raw.githubusercontent.com/stackharbor-devops/app_backup/main/
 
 targetNodes:

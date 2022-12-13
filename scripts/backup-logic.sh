@@ -16,7 +16,7 @@ function backup(){
     echo $(date) ${ENV_NAME} "Creating the ${BACKUP_TYPE} backup (using the backup addon with commit id ${BACKUP_ADDON_COMMIT_ID}) on storage node ${NODE_ID}" | tee -a ${BACKUP_LOG_FILE}
     [ -d /opt/backup ] || mkdir -p /opt/backup
     export FILES_COUNT=$(ls -n /opt/backup|awk '{print $2}');
-    if [ "${FILES_COUNT}" != "0" ]; then 
+    if [ "${FILES_COUNT}" != "0" ]; then
         echo $(date) ${ENV_NAME}  "Checking the backup repository integrity and consistency before adding the new snapshot" | tee -a $BACKUP_LOG_FILE;
         RESTIC_PASSWORD=${ENV_NAME} restic -q -r /opt/backup check  || { echo "Backup repository integrity check (before backup) failed."; exit 1; }
     else
@@ -27,9 +27,9 @@ function backup(){
     source /.jelenv ; if [[ ${MARIADB_VERSION//.*} -eq 10 && ${MARIADB_VERSION:3:1} -le 4 ]]; then COL_STAT=""; else COL_STAT="--column-statistics=0"; fi
     echo $(date) ${ENV_NAME} "Creating the DB dump" | tee -a ${BACKUP_LOG_FILE}
     source /etc/jelastic/metainf.conf ; if [ "${COMPUTE_TYPE}" == "lemp" -o "${COMPUTE_TYPE}" == "llsmp" ]; then service mysql status 2>&1 || service mysql start 2>&1; fi
-    mysqldump -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} --force --single-transaction --quote-names --opt --databases --compress ${COL_STAT} > app_db_backup.sql || { echo "DB backup process failed."; exit 1; }
+    #mysqldump -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} --force --single-transaction --quote-names --opt --databases --compress ${COL_STAT} > app_db_backup.sql || { echo "DB backup process failed."; exit 1; }
     echo $(date) ${ENV_NAME} "Saving data and DB dump to ${DUMP_NAME} snapshot" | tee -a ${BACKUP_LOG_FILE}
-    { RESTIC_PASSWORD=${ENV_NAME} restic -q -r /opt/backup backup --tag "${DUMP_NAME} ${BACKUP_ADDON_COMMIT_ID} ${BACKUP_TYPE}" ${APP_PATH} ~/app_db_backup.sql | tee -a $BACKUP_LOG_FILE; } || { echo "Backup rotation failed."; exit 1; }
+    #{ RESTIC_PASSWORD=${ENV_NAME} restic -q -r /opt/backup backup --tag "${DUMP_NAME} ${BACKUP_ADDON_COMMIT_ID} ${BACKUP_TYPE}" ${APP_PATH} ~/app_db_backup.sql | tee -a $BACKUP_LOG_FILE; } || { echo "Backup rotation failed."; exit 1; }
     echo $(date) ${ENV_NAME} "Rotating snapshots by keeping the last ${BACKUP_COUNT}" | tee -a $BACKUP_LOG_FILE
     { RESTIC_PASSWORD=${ENV_NAME} restic forget -q -r /opt/backup --keep-last ${BACKUP_COUNT} --prune | tee -a $BACKUP_LOG_FILE; } || { echo "Backup snapshot creation failed."; exit 1; }
     echo $(date) ${ENV_NAME} "Checking the backup repository integrity and consistency after adding the new snapshot and rotating old ones" | tee -a $BACKUP_LOG_FILE;
