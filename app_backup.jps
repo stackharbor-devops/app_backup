@@ -10,8 +10,11 @@ baseUrl: https://raw.githubusercontent.com/stackharbor-devops/app_backup/main/
 targetNodes:
   nodeType:
     - nginxphp
+    - nginxphp-old
     - litespeedphp
     - litespeedphp-old
+    - apachephp
+    - apachephp-old
     - lemp
     - llsmp
 
