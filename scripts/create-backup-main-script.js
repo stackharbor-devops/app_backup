@@ -1,7 +1,7 @@
 //@auth
 //@req(baseUrl, cronTime)
 
-var scriptName        = getParam("scriptName", "${env.envName}-wp-backup"),
+var scriptName        = getParam("scriptName", "${env.envName}-app-backup"),
     envName           = getParam("envName", "${env.envName}"),
     envAppid          = getParam("envAppid", "${env.appid}"),
     userId            = getparam("userId", ""),
@@ -9,7 +9,7 @@ var scriptName        = getParam("scriptName", "${env.envName}-wp-backup"),
     storageNodeId     = getParam("storageNodeId"),
     backupExecNode    = getParam("backupExecNode"),
     storageEnv        = getParam("storageEnv");
-    
+
 
 function run() {
     var BackupManager = use("scripts/backup-manager.js", {
@@ -33,7 +33,7 @@ function run() {
 
 function use(script, config) {
     var Transport = com.hivext.api.core.utils.Transport,
-        url = baseUrl + "/" + script + "?_r=" + Math.random(),   
+        url = baseUrl + "/" + script + "?_r=" + Math.random(),
         body = new Transport().get(url);
     return new (new Function("return " + body)())(config);
 }

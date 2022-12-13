@@ -5,7 +5,7 @@ var nodes = {};
 var currentStorageExists = false;
 var scheduleType = '${settings.scheduleType}';
 for (var i = 0, envInfo, env; envInfo = resp.infos[i]; i++) {
-    if (envInfo.envGroups.includes("WP Backup") || envInfo.envGroups.includes("Backup storage nodes")) {
+    if (envInfo.envGroups.includes("Backup storage nodes")) {
         env = envInfo.env
         if (env.status == 1) {
             for (var j = 0, node; node = envInfo.nodes[j]; j++) {
@@ -39,7 +39,7 @@ if (envs.length > 0) {
         jps.settings.main.fields[1].default = envs[0].value;
     }
 }
-      
+
 import java.util.TimeZone;
 var zones = toNative(TimeZone.getAvailableIDs());
 var values = {};
@@ -60,12 +60,12 @@ if (scheduleType == '1') {
     jps.settings.main.fields[0].showIf[1][0].default = '${settings.cronTime}';
 } else if (scheduleType == '2') {
     jps.settings.main.fields[0].showIf[2][0].default = '${settings.backupTime}';
-    var sun = ('${settings.sun}' === 'true'), 
-        mon = ('${settings.mon}' === 'true'), 
-        tue = ('${settings.tue}' === 'true'), 
-        wed = ('${settings.wed}' === 'true'), 
-        thu = ('${settings.thu}' === 'true'), 
-        fri = ('${settings.fri}' === 'true'), 
+    var sun = ('${settings.sun}' === 'true'),
+        mon = ('${settings.mon}' === 'true'),
+        tue = ('${settings.tue}' === 'true'),
+        wed = ('${settings.wed}' === 'true'),
+        thu = ('${settings.thu}' === 'true'),
+        fri = ('${settings.fri}' === 'true'),
         sat = ('${settings.sat}' === 'true');
     var selectedDays = {
       "caption": "Days",
@@ -119,7 +119,7 @@ if (scheduleType == '1') {
     };
     jps.settings.main.fields[0].showIf[2][1] = selectedDays;
     jps.settings.main.fields[0].showIf[2][2].values = values;
-    jps.settings.main.fields[0].showIf[2][2].value = '${settings.tz}';    
+    jps.settings.main.fields[0].showIf[2][2].value = '${settings.tz}';
 } else {
     jps.settings.main.fields[0].showIf[3][0].default = '${settings.cronTime}';
 }

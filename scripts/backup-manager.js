@@ -78,7 +78,7 @@ function BackupManager(config) {
     me.uninstall = function () {
         return me.exec(me.clearScheduledBackups);
     };
-	
+
     me.checkCurrentlyRunningBackup = function () {
 	var resp = me.exec([
             [ me.cmd, [
@@ -107,7 +107,7 @@ function BackupManager(config) {
         } else {
             backupType = "auto";
         }
-        
+
         return me.exec([
             [ me.checkEnvStatus ],
             [ me.checkStorageEnvStatus ],
@@ -130,7 +130,7 @@ function BackupManager(config) {
         [ me.removeMounts ]
         ]);
     };
-    
+
     me.restore = function () {
         return me.exec([
             [ me.checkEnvStatus ],
@@ -139,7 +139,7 @@ function BackupManager(config) {
             [ me.removeMounts ],
             [ me.addMountForBackupRestore ],
             [ me.cmd, [
-		'echo $(date) %(envName) Restoring the snapshot $(cat /root/.backupid)', 
+		'echo $(date) %(envName) Restoring the snapshot $(cat /root/.backupid)',
                 'jem service stop',
                 'SNAPSHOT_ID=$(RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ snapshots|grep $(cat /root/.backupid)|awk \'{print $1}\')',
                 '[ -n "${SNAPSHOT_ID}" ] || false',
@@ -154,7 +154,7 @@ function BackupManager(config) {
                 'for i in DB_HOST DB_USER DB_PASSWORD DB_NAME; do declare "${i}"=$(cat %(appPath)/wp-config.php |grep ${i}|awk \'{print $3}\'|tr -d "\'"); done',
                 'source /etc/jelastic/metainf.conf ; if [ "${COMPUTE_TYPE}" == "lemp" -o "${COMPUTE_TYPE}" == "llsmp" ]; then wget -O /root/addAppDbUser.sh %(baseUrl)/scripts/addAppDbUser.sh; chmod +x /root/addAppDbUser.sh; bash /root/addAppDbUser.sh ${DB_USER} ${DB_PASSWORD} ${DB_HOST}; fi',
                 'mysql -u${DB_USER} -p${DB_PASSWORD} -h ${DB_HOST} --execute="CREATE DATABASE IF NOT EXISTS ${DB_NAME};"',
-                'mysql -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} --force < /root/wp_db_backup.sql'
+                'mysql -h ${DB_HOST} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} --force < /root/app_db_backup.sql'
             ], {
                 nodeId : config.backupExecNode,
                 envName : config.envName,
@@ -162,7 +162,7 @@ function BackupManager(config) {
                 appPath : "/var/www/webroot/ROOT"
             }],
             [ me.cmd, [
-                'rm -f /root/.backupid /root/wp_db_backup.sql',
+                'rm -f /root/.backupid /root/app_db_backup.sql',
                 'jem service start'
             ], {
                 nodeGroup : "cp",
@@ -173,7 +173,7 @@ function BackupManager(config) {
     }
 
     me.addMountForBackupRestore = function addMountForBackupRestore() {
-        var resp = jelastic.env.file.AddMountPointByGroup(config.envName, session, "cp", "/opt/backup", 'nfs4', null, '/data/' + config.envName, config.storageNodeId, 'WPBackupRestore', false);
+        var resp = jelastic.env.file.AddMountPointByGroup(config.envName, session, "cp", "/opt/backup", 'nfs4', null, '/data/' + config.envName, config.storageNodeId, 'AppBackupRestore', false);
         if (resp.result != 0) {
             var title = "Backup storage " + config.storageEnv + " is unreacheable",
                 text = "Backup storage environment " + config.storageEnv + " is not accessible for storing backups from " + config.envName + ". The error message is " + resp.error;
@@ -189,7 +189,7 @@ function BackupManager(config) {
     me.removeMounts = function removeMountForBackup() {
         var allMounts = jelastic.env.file.GetMountPoints(config.envName, session, config.backupExecNode).array;
         for (var i = 0, n = allMounts.length; i < n; i++) {
-            if (allMounts[i].sourcePath == "/data/" + config.envName && allMounts[i].path == "/opt/backup" && allMounts[i].name == "WPBackupRestore" && allMounts[i].type == "INTERNAL") {
+            if (allMounts[i].sourcePath == "/data/" + config.envName && allMounts[i].path == "/opt/backup" && allMounts[i].name == "AppBackupRestore" && allMounts[i].type == "INTERNAL") {
                 return jelastic.env.file.RemoveMountPointByGroup(config.envName, session, "cp", "/opt/backup");
             }
         }
@@ -208,7 +208,7 @@ function BackupManager(config) {
 
         return { result : 0 };
     };
-	
+
     me.checkStorageEnvStatus = function checkStorageEnvStatus() {
         if(typeof config.storageEnv !== 'undefined'){
             var resp = jelastic.env.control.GetEnvInfo(config.storageEnv, session);
@@ -379,7 +379,7 @@ function BackupManager(config) {
 
             return envInfo;
         };
-        
+
         me.getStorageEnvInfo = function () {
             var resp;
             if (!storageEnvInfo) {
@@ -408,7 +408,7 @@ function BackupManager(config) {
             } else {
                 resp = jelastic.env.control.ExecCmdById(envName, session, values.nodeId, toJSON([{ command: command }]), true, "root");
             }
-        
+
         if (resp.result != 0) {
         var title = "Backup failed for " + config.envName,
                 text = "Backup failed for the environment " + config.envName + " of " + user.email + " with error message " + resp.responses[0].errOut;
