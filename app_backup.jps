@@ -13,8 +13,10 @@ targetNodes:
     - nginxphp-old
     - litespeedphp
     - litespeedphp-old
-    - apachephp
-    - apachephp-old
+    - apache
+    - apache-old
+    - apache2
+    - apache2-old
     - lemp
     - llsmp
 
