@@ -55,16 +55,16 @@ if (storage_unavailable_markup === "") {
         "caption": "Restore Type",
         "type": "list",
         "tooltip": "Select the type of backup restore you would like to perform",
-        "name": "restoreType",
+        "name": "temporaryRestore",
         "required": true,
         "values": [
             {
-              "value": '0',
+              "value": 'false',
               "caption": "Restore backup to original webroot."
             },
             {
-              "value": '1',
-              "caption": "Restore to temporary location."
+              "value": 'true',
+              "caption": "Restore to a temporary webroot."
             }
         ]
     })

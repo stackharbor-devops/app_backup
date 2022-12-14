@@ -309,7 +309,7 @@
       "getStorageCtid",
       {
         "cmd[cp]": "echo \"${settings.backupDir}\" > /root/.backupid",
-        "cmd[cp]": "echo \"${settings.restoreType}\" > /root/.restoretype",
+        "cmd[cp]": "echo \"${settings.temporaryRestore}\" > /root/.temporaryrestore",
         "user": "root"
       },
       {

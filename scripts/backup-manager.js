@@ -150,7 +150,7 @@ function BackupManager(config) {
             }],
             [ me.cmd, [
                 'rm -f /root/.backupid',
-                'rm -f /root/.restoretype',
+                'rm -f /root/.temporaryrestore',
                 'jem service start'
             ], {
                 nodeGroup : "cp",
