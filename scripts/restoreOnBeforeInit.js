@@ -57,6 +57,7 @@ if (storage_unavailable_markup === "") {
         "tooltip": "Select the type of backup restore you would like to perform",
         "name": "temporaryRestore",
         "required": true,
+        "default": 'false',
         "values": [
             {
               "value": 'false',
@@ -64,7 +65,7 @@ if (storage_unavailable_markup === "") {
             },
             {
               "value": 'true',
-              "caption": "Restore to /RESTORE/DATE/... folder"
+              "caption": "Restore backup to /RESTORE/DATE/... folder"
             }
         ]
     })
