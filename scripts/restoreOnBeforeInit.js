@@ -16,7 +16,7 @@ if (resp.result == 11) {
 } else {
     storage_unavailable_markup = "Storage environment " + storageEnvDomain + " is unavailable (stopped/sleeping).";
 }
-      
+
 function getStorageNodeid(){
     var storageEnv = '${settings.storageName}'
     var storageEnvShortName = storageEnv.split(".")[0]
@@ -46,10 +46,27 @@ if (storage_unavailable_markup === "") {
     settings.fields.push({
         "caption": "Backup",
         "type": "list",
-        "tooltip": "Select the time stamp for which you want to restore the contents of the web site",          
+        "tooltip": "Select the time stamp for which you want to restore the contents of the web site",
         "name": "backupDir",
         "required": true,
         "values": backupListPrepared
+    });
+    settings.fields.push({
+        "caption": "Restore Type",
+        "type": "list",
+        "tooltip": "Select the type of backup restore you would like to perform",
+        "name": "restoreType",
+        "required": true,
+        "values": [
+            {
+              "value": '0',
+              "caption": "Restore backup to original webroot."
+            },
+            {
+              "value": '1',
+              "caption": "Restore to temporary location."
+            }
+        ]
     })
 } else {
     settings.fields.push(

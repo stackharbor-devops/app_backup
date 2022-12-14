@@ -1,315 +1,360 @@
-type: update
-jpsVersion: 6.1.1
-name: Application Backup/Restore for the filesystem
-id: app-backup
-targetEditions: any
-logo: /images/backup-logo.svg
-description: Backup Add-On for the application root directory. It can be used to create scheduled backups according to any required timezone and restore corrupted websites, even if the content has been completely deleted.
-baseUrl: https://raw.githubusercontent.com/stackharbor-devops/app_backup/main/
-
-targetNodes:
-  nodeType:
-    - nginxphp
-    - nginxphp-old
-    - litespeedphp
-    - litespeedphp-old
-    - apache
-    - apache-old
-    - apache2
-    - apache2-old
-    - lemp
-    - llsmp
-
-settings:
-  main:
-    fields:
-      - type: radio-fieldset
-        name: scheduleType
-        hidden: false
-        default: '1'
-        values:
-          - value: 1
-            caption: Pre-defined
-          - value: 2
-            caption: Custom
-          - value: 3
-            caption: Manual (crontab)
-            tooltip: "<span>A simple <a href=\"https://en.wikipedia.org/wiki/Cron#Overview\" target=\"_blank\"> cron-based</a>
-    scheduler to automatically start the backup process based on prescribed timing
-    instructions.</span><div><b>Note</b> that the required timestamps should be specified
-    respectively to the UTC time zone.</div>"
-        showIf:
-          1:
-            - name: cronTime
-              caption: Backup schedule
-              type: list
-              editable: false
-              values:
-                - value: 0 * * * *
-                  caption: "Hourly (at minute 0)"
-                - value: 0 0 * * *
-                  caption: "Daily (at 00:00)"
-                - value: 0 0 * * 0
-                  caption: "Weekly (at 00:00 on Sunday)"
-                - value: 0 0 1 * *
-                  caption: "Monthly (at 00:00 on day 1)"
-              default: 0 0 * * *
-          2:
-            - type: string
-              name: backupTime
-              caption: Time
-              inputType: time
-              default: "09:00"
-              cls: x-form-text
-              width: 120
-              required: true
-            - caption: Days
-              type: compositefield
-              name: days
-              defaultMargins: 0 12 0 0
-              items:
-                - name: sun
-                  value: true
-                  type: checkbox
-                  caption: Su
-                - name: mon
-                  value: true
-                  type: checkbox
-                  caption: Mo
-                - name: tue
-                  value: true
-                  type: checkbox
-                  caption: Tu
-                - name: wed
-                  value: true
-                  type: checkbox
-                  caption: We
-                - name: thu
-                  value: true
-                  type: checkbox
-                  caption: Th
-                - name: fri
-                  value: true
-                  type: checkbox
-                  caption: Fr
-                - name: sat
-                  value: true
-                  type: checkbox
-                  caption: Sa
-            - name: "tz"
-              caption: "Time Zone"
-              type: "list"
-              required: true
-              editable: true
-              forceSelection: true
-              values: values
-          3:
-            - name: cronTime
-              caption: Crontab
-              type: string
-              default: 0 0 * * *
-              regexText: Cron syntax is incorrect!
-              regex: "^(((([\\\\*]{1}){1,})|((\\\\*\\\\\\/){0,1}(([0-9\\/\\*\\-\\,]{1}){1,}|(([1-5]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,}){1})))
-              ((([\\\\*]{1}){1,})|((\\\\*\\\\\\/){0,1}(([0-9\\/\\*\\-\\,]{1}){1,}|(([1]{1}){1}([0-9\\/\\*\\-\\,-]{1}){1,}){1}|([2]{1}){1}([0-3]{1}){1})))
-              ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([1-9]{1}){1}|(([1-2]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,5}){1}|([3]{1}){1}([0-1]{1}){1})))
-              ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([1-9]{1}){1}|(([1-2]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,}){1}|([3]{1}){1}([0-1]{1}){1}))|(jan|JAN|feb|FEB|mar|MAR|apr|APR|may|MAY|jun|JUN|jul|JUL|aug|AUG|sep|SEP|okt|OKT|nov|NOV|dec|DEC)(-?\\w+?)?)
-              ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([0-7]{1,}(-?[0-7]?(,[0-7]){0,6})){1}))|((sun|SUN|mon|MON|tue|TUE|wed|WED|thu|THU|fri|FRI|sat|SAT)?(,(sun|SUN|mon|MON|tue|TUE|wed|WED|thu|THU|fri|FRI|sat|SAT)){0,6})(-?\\w+?)?))$|^(@(reboot|yearly|annualy|monthly|weekly|daily|hourly))$"
-      - caption: Backup storage
-        type: list
-        tooltip: "The environment with backup storage to be used for backups creation. Presence of this environment is obligatory."
-        name: storageName
-        dependsOn: region
-        required: true
-      - type: spinner
-        name: backupCount
-        caption: Number of backups
-        tooltip: "The number of newest backups to be kept during rotation."
-        min: 1
-        max: 100
-        default: 5
-    onBeforeInit: scripts/configOnBeforeInit.js
-
-  restore:
-    fields: []
-    onBeforeInit: scripts/restoreOnBeforeInit.js
-
-onBeforeInit: scripts/backupOnBeforeInit.js
-
-buttons:
-- caption: Backup Now
-  action: backup
-  loadingText: Backing up...
-  confirmText: Do you want to initiate the backup process?
-  successText: The backup process has been finished successfully.
-
-- caption: Configure
-  action: configure
-  settings: main
-  loadingText: Configuring...
-  successText: The backup configs have been updated successfully.
-
-- caption: Restore
-  action: restore
-  loadingText: Restoring...
-  settings: restore
-  successText: The backup have been successfully restored.
-  title: Restore Backup
-  submitButtonText: Restore
-  confirmText: You are going to restore from a backup, which will override all your existing data. This action cannot be canceled or reverted. Do you want to proceed?
-
-globals:
-  scriptSufix: app-backup
-
-onInstall:
-  - checkApplication
-  - installRestic
-  - setSchedule
-
-onUninstall:
-  - callScript: uninstall
-  - removeScript
-
-onBeforeDelete:
-  - callScript: uninstall
-  - removeScript
-
-onAfterRedeployContainer[cp]:
-  - installRestic
-
-onAfterClone:
-  - script: return {result:0, jps:MANIFEST};
-  - install: ${response.jps}
-    nodeGroup: ${targetNodes.nodeGroup:cp}
-    envName: ${event.response.env.envName}
-    settings:
-      scheduleType: ${settings.scheduleType}
-      storageName: ${settings.storageName}
-      cronTime: ${settings.cronTime}
-      backupTime: ${settings.backupTime}
-      sun: ${settings.sun}
-      mon: ${settings.mon}
-      tue: ${settings.tue}
-      wed: ${settings.wed}
-      thu: ${settings.thu}
-      fri: ${settings.fri}
-      sat: ${settings.sat}
-      tz: ${settings.tz}
-      backupCount: ${settings.backupCount}
-
-onAfterConfirmTransfer: setSchedule
-
-actions:
-  checkApplication:
-    - cmd[${nodes.cp.master.id}]: |-
-        [ -f /root/check_app.sh ] && rm -f /root/check_app.sh;
-        wget -O /root/check_app.sh ${baseUrl}/scripts/check_app.sh;
-        bash /root/check_app.sh;
-      user: root
-    - if (response.out == "Non-supported"):
-      - stopEvent:
-          type: warning
-          message: Deployed application is not supported by Backup add-on.
-
-  installRestic:
-    cmd [cp]: |-
-      yum-config-manager --add-repo https://copr.fedorainfracloud.org/coprs/copart/restic/repo/epel-7/copart-restic-epel-7.repo
-      yum-config-manager --enable copr:copr.fedorainfracloud.org:copart:restic
-      yum -y install restic
-      yum-config-manager --disable copr:copr.fedorainfracloud.org:copart:restic
-      wget -O /etc/logrotate.d/backup-addon ${baseUrl}/scripts/backup-addon;
-    user: root
-
-  installScript:
-    - removeScript
-    - getStorageCtid
-    - script: ${baseUrl}/scripts/create-backup-main-script.js?_r=${fn.random}
-      params:
-        scriptName: ${env.envName}-${globals.scriptSufix}
-        baseUrl: ${baseUrl}
-        cronTime: ${this.cronTime}
-        backupCount: ${this.backupCount}
-        userId: ${env.uid}
-        storageNodeId: ${response.storageCtid}
-        backupExecNode: ${nodes.cp.master.id}
-        storageEnv: ${response.storageEnvShortName}
-
-  callScript:
-    script: |-
-      var resp = jelastic.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {action:"${this}"});
-      return resp.response || resp;
-
-  removeScript:
-    script: |-
-      var resp = jelastic.dev.scripting.GetScript(appid, session, '${env.envName}-${globals.scriptSufix}');
-      if (resp.result === 0) {
-          var resp = jelastic.dev.scripting.DeleteScript(appid, session, '${env.envName}-${globals.scriptSufix}');
-          return resp.response || resp;
-      }
-      return { result: 0 };
-
-  backup:
-    - callScript: backup
-
-  restore:
-    - getStorageCtid
-    - cmd[cp]: |-
-        echo "${settings.backupDir}" > /root/.backupid
-      user: root
-    - callScript: restore
-
-  configure:
-    - setSchedule
-
-  getStorageCtid:
-    - script: |-
-        var storageEnv = '${globals.storageEnv}'
-        var storageEnvShortName = storageEnv.split(".")[0]
-        var resp = jelastic.environment.control.GetEnvInfo(storageEnvShortName, session)
-        if (resp.result != 0) return resp
-        for (var i = 0; resp.nodes; i++) {
-            var node = resp.nodes[i]
-            if (node.nodeGroup == 'storage' && node.ismaster) {
-                return { result: 0, storageCtid : node.id, storageEnvShortName : storageEnvShortName};
+{
+  "type": "update",
+  "jpsVersion": "6.1.1",
+  "name": "Stack Harbor: Backup/Restore Webroot",
+  "id": "app-backup",
+  "targetEditions": "any",
+  "logo": "/images/backup-logo.svg",
+  "description": "Backup/Restore add-on for application layers, that is used to perform incremental backups using Restic of app node filsystem webroot. It can be used to create scheduled backups according to any required timezone and restore webroot with a single click.",
+  "baseUrl": "https://raw.githubusercontent.com/stackharbor-devops/app_backup/main/",
+  "targetNodes": {
+    "nodeType": [
+      "nginxphp",
+      "nginxphp-old",
+      "litespeedphp",
+      "litespeedphp-old",
+      "apache",
+      "apache-old",
+      "apache2",
+      "apache2-old",
+      "lemp",
+      "llsmp"
+    ]
+  },
+  "settings": {
+    "main": {
+      "fields": [
+        {
+          "type": "radio-fieldset",
+          "name": "scheduleType",
+          "hidden": false,
+          "default": "1",
+          "values": [
+            {
+              "value": 1,
+              "caption": "Pre-defined"
+            },
+            {
+              "value": 2,
+              "caption": "Custom"
+            },
+            {
+              "value": 3,
+              "caption": "Manual (crontab)",
+              "tooltip": "<span>A simple <a href=\"https://en.wikipedia.org/wiki/Cron#Overview\" target=\"_blank\"> cron-based</a> scheduler to automatically start the backup process based on prescribed timing instructions.</span><div><b>Note</b> that the required timestamps should be specified respectively to the UTC time zone.</div>"
             }
+          ],
+          "showIf": {
+            "1": [
+              {
+                "name": "cronTime",
+                "caption": "Backup schedule",
+                "type": "list",
+                "editable": false,
+                "values": [
+                  {
+                    "value": "0 * * * *",
+                    "caption": "Hourly (at minute 0)"
+                  },
+                  {
+                    "value": "0 0 * * *",
+                    "caption": "Daily (at 00:00)"
+                  },
+                  {
+                    "value": "0 0 * * 0",
+                    "caption": "Weekly (at 00:00 on Sunday)"
+                  },
+                  {
+                    "value": "0 0 1 * *",
+                    "caption": "Monthly (at 00:00 on day 1)"
+                  }
+                ],
+                "default": "0 0 * * *"
+              }
+            ],
+            "2": [
+              {
+                "type": "string",
+                "name": "backupTime",
+                "caption": "Time",
+                "inputType": "time",
+                "default": "09:00",
+                "cls": "x-form-text",
+                "width": 120,
+                "required": true
+              },
+              {
+                "caption": "Days",
+                "type": "compositefield",
+                "name": "days",
+                "defaultMargins": "0 12 0 0",
+                "items": [
+                  {
+                    "name": "sun",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Su"
+                  },
+                  {
+                    "name": "mon",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Mo"
+                  },
+                  {
+                    "name": "tue",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Tu"
+                  },
+                  {
+                    "name": "wed",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "We"
+                  },
+                  {
+                    "name": "thu",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Th"
+                  },
+                  {
+                    "name": "fri",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Fr"
+                  },
+                  {
+                    "name": "sat",
+                    "value": true,
+                    "type": "checkbox",
+                    "caption": "Sa"
+                  }
+                ]
+              },
+              {
+                "name": "tz",
+                "caption": "Time Zone",
+                "type": "list",
+                "required": true,
+                "editable": true,
+                "forceSelection": true,
+                "values": "values"
+              }
+            ],
+            "3": [
+              {
+                "name": "cronTime",
+                "caption": "Crontab",
+                "type": "string",
+                "default": "0 0 * * *",
+                "regexText": "Cron syntax is incorrect!",
+                "regex": "^(((([\\\\*]{1}){1,})|((\\\\*\\\\\\/){0,1}(([0-9\\/\\*\\-\\,]{1}){1,}|(([1-5]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,}){1}))) ((([\\\\*]{1}){1,})|((\\\\*\\\\\\/){0,1}(([0-9\\/\\*\\-\\,]{1}){1,}|(([1]{1}){1}([0-9\\/\\*\\-\\,-]{1}){1,}){1}|([2]{1}){1}([0-3]{1}){1}))) ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([1-9]{1}){1}|(([1-2]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,5}){1}|([3]{1}){1}([0-1]{1}){1}))) ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([1-9]{1}){1}|(([1-2]{1}){1}([0-9\\/\\*\\-\\,]{1}){1,}){1}|([3]{1}){1}([0-1]{1}){1}))|(jan|JAN|feb|FEB|mar|MAR|apr|APR|may|MAY|jun|JUN|jul|JUL|aug|AUG|sep|SEP|okt|OKT|nov|NOV|dec|DEC)(-?\\w+?)?) ((([\\\\*]{1}){1})|((\\\\*\\\\\\/){0,1}(([0-7]{1,}(-?[0-7]?(,[0-7]){0,6})){1}))|((sun|SUN|mon|MON|tue|TUE|wed|WED|thu|THU|fri|FRI|sat|SAT)?(,(sun|SUN|mon|MON|tue|TUE|wed|WED|thu|THU|fri|FRI|sat|SAT)){0,6})(-?\\w+?)?))$|^(@(reboot|yearly|annualy|monthly|weekly|daily|hourly))$"
+              }
+            ]
+          }
+        },
+        {
+          "caption": "Backup storage",
+          "type": "list",
+          "tooltip": "The environment with backup storage to be used for backups creation. Presence of this environment is obligatory.",
+          "name": "storageName",
+          "dependsOn": "region",
+          "required": true
+        },
+        {
+          "type": "spinner",
+          "name": "backupCount",
+          "caption": "Number of backups",
+          "tooltip": "The number of newest backups to be kept during rotation.",
+          "min": 1,
+          "max": 100,
+          "default": 5
         }
-
-  convert:
-    - script: |
-        var resp = {result:0, onAfterReturn: {setGlobals:{cron: ""}}}, offset = java.util.TimeZone.getTimeZone("${settings.tz}").getRawOffset(),
-            setGlobals = resp.onAfterReturn.setGlobals;
-
-        var time = "${settings.backupTime}".split(":"),
-            d1 = new Date(2020, 1, 10, parseInt(time[0],10), parseInt(time[1],10)),
-            d2 = new Date(d1.getTime() - offset),
-            dd = d2.getDate() - d1.getDate(),
-            days = getDays([${settings.sun:0}, ${settings.mon:0}, ${settings.tue:0}, ${settings.wed:0}, ${settings.thu:0}, ${settings.fri:0}, ${settings.sat:0}], dd);
-
-        setGlobals.cron = d2.getMinutes() + " " + d2.getHours() + " * * " + days.join(",");
-
-
-        function getDays(settings, dd) {
-          var days = [];
-          for (var i = 0, n = settings.length; i < n; i++) {
-            if (settings[i]) {
-              var day = i + dd;
-              if (day < 0) day +=7; else if (day > 6) day -=7;
-              days.push(day);
+      ],
+      "onBeforeInit": "scripts/configOnBeforeInit.js"
+    },
+    "restore": {
+      "fields": [],
+      "onBeforeInit": "scripts/restoreOnBeforeInit.js"
+    }
+  },
+  "onBeforeInit": "scripts/backupOnBeforeInit.js",
+  "buttons": [
+    {
+      "caption": "Backup Now",
+      "action": "backup",
+      "loadingText": "Backing up...",
+      "confirmText": "Do you want to initiate the backup process?",
+      "successText": "The backup process has been finished successfully."
+    },
+    {
+      "caption": "Configure",
+      "action": "configure",
+      "settings": "main",
+      "loadingText": "Configuring...",
+      "successText": "The backup configs have been updated successfully."
+    },
+    {
+      "caption": "Restore",
+      "action": "restore",
+      "loadingText": "Restoring...",
+      "settings": "restore",
+      "successText": "The backup have been successfully restored.",
+      "title": "Restore Backup",
+      "submitButtonText": "Restore",
+      "confirmText": "You are going to restore from a backup, which will override all your existing data. This action cannot be canceled or reverted. Do you want to proceed?"
+    }
+  ],
+  "globals": {
+    "scriptSufix": "app-backup"
+  },
+  "onInstall": [
+    "checkApplication",
+    "installRestic",
+    "setSchedule"
+  ],
+  "onUninstall": [
+    {
+      "callScript": "uninstall"
+    },
+    "removeScript"
+  ],
+  "onBeforeDelete": [
+    {
+      "callScript": "uninstall"
+    },
+    "removeScript"
+  ],
+  "onAfterRedeployContainer[cp]": [
+    "installRestic"
+  ],
+  "onAfterClone": [
+    {
+      "script": "return {result:0, jps:MANIFEST};"
+    },
+    {
+      "install": "${response.jps}",
+      "nodeGroup": "${targetNodes.nodeGroup:cp}",
+      "envName": "${event.response.env.envName}",
+      "settings": {
+        "scheduleType": "${settings.scheduleType}",
+        "storageName": "${settings.storageName}",
+        "cronTime": "${settings.cronTime}",
+        "backupTime": "${settings.backupTime}",
+        "sun": "${settings.sun}",
+        "mon": "${settings.mon}",
+        "tue": "${settings.tue}",
+        "wed": "${settings.wed}",
+        "thu": "${settings.thu}",
+        "fri": "${settings.fri}",
+        "sat": "${settings.sat}",
+        "tz": "${settings.tz}",
+        "backupCount": "${settings.backupCount}"
+      }
+    }
+  ],
+  "onAfterConfirmTransfer": "setSchedule",
+  "actions": {
+    "checkApplication": [
+      {
+        "cmd[${nodes.cp.master.id}]": "[ -f /root/check_app.sh ] && rm -f /root/check_app.sh;\nwget -O /root/check_app.sh ${baseUrl}/scripts/check_app.sh;\nbash /root/check_app.sh;",
+        "user": "root"
+      },
+      {
+        "if (response.out == \"Non-supported\")": [
+          {
+            "stopEvent": {
+              "type": "warning",
+              "message": "Deployed application is not supported by Backup add-on."
             }
           }
-          days.sort();
-          return days;
+        ]
+      }
+    ],
+    "installRestic": {
+      "cmd [cp]": "yum-config-manager --add-repo https://copr.fedorainfracloud.org/coprs/copart/restic/repo/epel-7/copart-restic-epel-7.repo\nyum-config-manager --enable copr:copr.fedorainfracloud.org:copart:restic\nyum -y install restic\nyum-config-manager --disable copr:copr.fedorainfracloud.org:copart:restic\nwget -O /etc/logrotate.d/backup-addon ${baseUrl}/scripts/backup-addon;",
+      "user": "root"
+    },
+    "installScript": [
+      "removeScript",
+      "getStorageCtid",
+      {
+        "script": "${baseUrl}/scripts/create-backup-main-script.js?_r=${fn.random}",
+        "params": {
+          "scriptName": "${env.envName}-${globals.scriptSufix}",
+          "baseUrl": "${baseUrl}",
+          "cronTime": "${this.cronTime}",
+          "backupCount": "${this.backupCount}",
+          "userId": "${env.uid}",
+          "storageNodeId": "${response.storageCtid}",
+          "backupExecNode": "${nodes.cp.master.id}",
+          "storageEnv": "${response.storageEnvShortName}"
         }
-
-        return resp;
-
-  setSchedule:
-    - setGlobals:
-        storageEnv: ${settings.storageName}
-    - if ("${settings.scheduleType}" == 2):
-      - convert
-    - else:
-      - setGlobals:
-          cron: ${settings.cronTime}
-    - installScript:
-        cronTime: ${globals.cron}
-        backupCount: ${settings.backupCount}
+      }
+    ],
+    "callScript": {
+      "script": "var resp = jelastic.dev.scripting.Eval(appid, session, '${env.envName}-${globals.scriptSufix}', {action:\"${this}\"});\nreturn resp.response || resp;"
+    },
+    "removeScript": {
+      "script": "var resp = jelastic.dev.scripting.GetScript(appid, session, '${env.envName}-${globals.scriptSufix}');\nif (resp.result === 0) {\n    var resp = jelastic.dev.scripting.DeleteScript(appid, session, '${env.envName}-${globals.scriptSufix}');\n    return resp.response || resp;\n}\nreturn { result: 0 };"
+    },
+    "backup": [
+      {
+        "callScript": "backup"
+      }
+    ],
+    "restore": [
+      "getStorageCtid",
+      {
+        "cmd[cp]": "echo \"${settings.backupDir}\" > /root/.backupid",
+        "cmd[cp]": "echo \"${settings.restoreType}\" > /root/.restoretype",
+        "user": "root"
+      },
+      {
+        "callScript": "restore"
+      }
+    ],
+    "configure": [
+      "setSchedule"
+    ],
+    "getStorageCtid": [
+      {
+        "script": "var storageEnv = '${globals.storageEnv}'\nvar storageEnvShortName = storageEnv.split(\".\")[0]\nvar resp = jelastic.environment.control.GetEnvInfo(storageEnvShortName, session)\nif (resp.result != 0) return resp\nfor (var i = 0; resp.nodes; i++) {\n    var node = resp.nodes[i]\n    if (node.nodeGroup == 'storage' && node.ismaster) {\n        return { result: 0, storageCtid : node.id, storageEnvShortName : storageEnvShortName};\n    }\n}"
+      }
+    ],
+    "convert": [
+      {
+        "script": "var resp = {result:0, onAfterReturn: {setGlobals:{cron: \"\"}}}, offset = java.util.TimeZone.getTimeZone(\"${settings.tz}\").getRawOffset(),\n    setGlobals = resp.onAfterReturn.setGlobals;\n\nvar time = \"${settings.backupTime}\".split(\":\"),\n    d1 = new Date(2020, 1, 10, parseInt(time[0],10), parseInt(time[1],10)),\n    d2 = new Date(d1.getTime() - offset),\n    dd = d2.getDate() - d1.getDate(),\n    days = getDays([${settings.sun:0}, ${settings.mon:0}, ${settings.tue:0}, ${settings.wed:0}, ${settings.thu:0}, ${settings.fri:0}, ${settings.sat:0}], dd);\n\nsetGlobals.cron = d2.getMinutes() + \" \" + d2.getHours() + \" * * \" + days.join(\",\");\n\n\nfunction getDays(settings, dd) {\n  var days = [];\n  for (var i = 0, n = settings.length; i < n; i++) {\n    if (settings[i]) {\n      var day = i + dd;\n      if (day < 0) day +=7; else if (day > 6) day -=7;\n      days.push(day);\n    }\n  }\n  days.sort();\n  return days;\n}\n\nreturn resp;\n"
+      }
+    ],
+    "setSchedule": [
+      {
+        "setGlobals": {
+          "storageEnv": "${settings.storageName}"
+        }
+      },
+      {
+        "if (\"${settings.scheduleType}\" == 2)": [
+          "convert"
+        ]
+      },
+      {
+        "else": [
+          {
+            "setGlobals": {
+              "cron": "${settings.cronTime}"
+            }
+          }
+        ]
+      },
+      {
+        "installScript": {
+          "cronTime": "${globals.cron}",
+          "backupCount": "${settings.backupCount}"
+        }
+      }
+    ]
+  }
+}
