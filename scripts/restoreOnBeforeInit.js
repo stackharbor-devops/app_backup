@@ -60,11 +60,11 @@ if (storage_unavailable_markup === "") {
         "values": [
             {
               "value": 'false',
-              "caption": "Restore to original webroot /var/www/webroot/ROOT"
+              "caption": "Restore backup to original webroot folder"
             },
             {
               "value": 'true',
-              "caption": "Restore to /TEMPORARY/DATE/var/www/webroot/ROOT"
+              "caption": "Restore to /RESTORE/DATE/... folder"
             }
         ]
     })
