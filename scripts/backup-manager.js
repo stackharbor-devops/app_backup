@@ -143,7 +143,7 @@ function BackupManager(config) {
                 'jem service stop',
                 'SNAPSHOT_ID=$(RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ snapshots|grep $(cat /root/.backupid)|awk \'{print $1}\')',
                 '[ -n "${SNAPSHOT_ID}" ] || false',
-		'if [ -z ${ENV_RESTORE_TARGET+x} ]; then ENV_RESTORE_TARGET="/"; fi',
+		'if [ -z ${ENV_RESTORE_TARGET+x} ]; then ENV_RESTORE_TARGET="/"; else ENV_RESTORE_TARGET=/RESTORE/$(date +“%Y%m%d_%H%M%S”); fi',
                 'RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ restore ${SNAPSHOT_ID} --target $ENV_RESTORE_TARGET',
 		'unset $ENV_RESTORE_TARGET'
 		
