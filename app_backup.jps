@@ -308,8 +308,7 @@
     "restore": [
       "getStorageCtid",
       {
-        "cmd[cp]": "echo \"${settings.backupDir}\" > /root/.backupid",
-        "cmd[cp]": "echo \"${settings.temporaryRestore}\" > /root/.temporaryrestore",
+        "cmd[cp]": "echo \"${settings.backupDir}\" > /root/.backupid;\necho \"${settings.temporaryRestore}\" > /root/.temporaryrestore",
         "user": "root"
       },
       {
