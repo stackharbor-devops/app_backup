@@ -143,7 +143,11 @@ function BackupManager(config) {
                 'jem service stop',
                 'SNAPSHOT_ID=$(RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ snapshots|grep $(cat /root/.backupid)|awk \'{print $1}\')',
                 '[ -n "${SNAPSHOT_ID}" ] || false',
-		'mkdir /var/www/webroot/ROOT/RESTORE/$(date +"%Y%m%d_%H%M%S")',
+		'mkdir /RESTORE/$(date +"%Y%m%d_%H%M%S")',
+		'chown apache. /RESTORE', 
+		'mkdir /RESTORE/$(date +"%Y%m%d_%H%M%S")',
+		'mkdir /RESTORE/$(date +"%Y%m%d_%H%M%S")'
+		'mkdir /RESTORE/$(date +"%Y%m%d_%H%M%S")',
                 'TEMPORARY_RESTORE=$(cat /root/.temporaryrestore); if (( ! $TEMPORARY_RESTORE )); then ENV_RESTORE_TARGET="/"; else ENV_RESTORE_TARGET="/RESTORE/$(date +"%Y%m%d_%H%M%S")/"; fi',
                 'RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ restore ${SNAPSHOT_ID} --target $ENV_RESTORE_TARGET'
           //      'RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ restore ${SNAPSHOT_ID} --target /'
