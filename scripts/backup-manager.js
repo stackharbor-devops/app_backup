@@ -144,7 +144,8 @@ function BackupManager(config) {
                 'SNAPSHOT_ID=$(RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ snapshots|grep $(cat /root/.backupid)|awk \'{print $1}\')',
                 '[ -n "${SNAPSHOT_ID}" ] || false',
 		'current_time=$(date +"%Y%m%d_%H%M%S")',
-	        'TEMPORARY_RESTORE=$(cat /root/.temporaryrestore); if (( ! $TEMPORARY_RESTORE )); then ENV_RESTORE_TARGET="/"; else mkdir -p /var/www/webroot-restore/$current_time; ENV_RESTORE_TARGET="/var/www/webroot-restore/$current_time/"; fi',
+	        'TEMPORARY_RESTORE=$(cat /root/.temporaryrestore)',
+		'if (( $TEMPORARY_RESTORE != true )); then ENV_RESTORE_TARGET="/"; else mkdir -p /var/www/webroot-restore/$current_time; ENV_RESTORE_TARGET="/var/www/webroot-restore/$current_time/"; fi',
                 'RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ restore ${SNAPSHOT_ID} --target $ENV_RESTORE_TARGET --path $ENV_RESTORE_TARGET'
           //      'RESTIC_PASSWORD="%(envName)" restic -r /opt/backup/ restore ${SNAPSHOT_ID} --target /'
             ], {
