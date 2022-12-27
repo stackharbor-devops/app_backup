@@ -6,7 +6,7 @@
   "targetEditions": "any",
   "logo": "/images/backup-logo.svg",
   "description": "Backup/Restore add-on for application layers, that is used to perform incremental backups using Restic of app node filsystem webroot. It can be used to create scheduled backups according to any required timezone and restore webroot with a single click.",
-  "baseUrl": "https://raw.githubusercontent.com/stackharbor-devops/app_backup/main/",
+  "baseUrl": "https://raw.githubusercontent.com/stackharbor-devops/app_backup/main",
   "targetNodes": {
     "nodeType": [
       "nginxphp",
