@@ -121,7 +121,7 @@ function BackupManager(config) {
             ], {
                 nodeId : config.backupExecNode,
                 envName : config.envName,
-                appPath : "/var/www/webroot/ROOT",
+                appPath : "/var/www/webroot",
                 backupCount : config.backupCount,
                 backupLogFile : "/var/log/backup_addon.log",
                 baseUrl : config.baseUrl,
